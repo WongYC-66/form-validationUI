@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple form</title>
+    <style>
+        #container{
+            width: 60%;
+            border: 1px solid black;
+            padding: 30px;
+            /*  */
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 15px;
+        }
+        #container button[type='submit']{
+            grid-column: 1 / 3;
+        }
+        input{
+            border-radius: 50px;
+            padding: 0 15px;
+        }
+        input:valid{
+            border : 3px solid greenyellow;
+        }
+        input.invalid{
+            border : 3px solid rgb(220, 17, 50);
+        }
+        #container span{
+            font-size: 0.8rem;
+            grid-column: 2; 
+            display: none;
+            color: rgb(220, 17, 50);
+        }
+        #container span.show{
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <h1>Simple validation form</h1>
+    <form id="container">
+        <label for="email">Email : </label><input type="email" id="email" required>
+        <span id="emailError"></span>
+        <label for="country">Country : </label>
+        <input 
+            type="text" 
+            id="country" 
+            pattern = "^[a-zA-Z]{3,}$"
+            required
+        >
+        <span id="countryError"></span>
+        <label for="zipCode">Zip Code : </label>
+        <input 
+            type="text" 
+            id="zipCode" 
+            pattern = "^\d{5}$"
+            required>
+        <span id="zipError"></span>
+        <label for="pw1">Password : </label>
+        <input 
+            type="password" 
+            id="pw1" 
+            minlength="8"
+            required>
+        <span id="pw1Error"></span>
+        <label for="pw2">Confirm-Password : </label>
+        <input 
+            type="password" 
+            id="pw2" 
+            minlength="8"
+            required>
+        <span id="pw2Error"></span>
+
+        <button type="submit">submit</button>
+        
+    </form>
+    <!--  -->
+    <script>
+        const inputRules = {
+            email: {
+                rule : '^(\\w+)@(\\w+)\\.(\\w+)$',
+                spanId : 'emailError',
+                errorMsg : [
+                    'Please enter email in format of :  xxxxxx@xxxx.com'
+                ]
+            },
+            country: {
+                rule : '^[a-zA-Z]{3,}$',
+                spanId : 'countryError',
+                errorMsg : [
+                    'Please enter country correct format without number or symbol '
+                ]
+            },
+            zipCode: {
+                rule : '^\\d{5}$',
+                spanId : 'zipError',
+                errorMsg : [
+                    'Please enter zip code in format of :  42000'
+                ]
+            },
+            pw1: {
+                rule : '^\\w{8,}$',
+                spanId : 'pw1Error',
+                errorMsg : [
+                    'Please enter at least 8 character long'
+                ]
+            },
+            pw2: {
+                rule : 'no-rule',
+                spanId : 'pw2Error',
+                errorMsg : [
+                    'Password does not match'
+                ]
+            },
+        }
+        document.querySelectorAll('input').forEach(x => {
+
+            x.addEventListener('input', function(){
+                let id = x.id
+                let spanBox = document.querySelector(`#${inputRules[id].spanId}`)
+
+                let regex = new RegExp(inputRules[id].rule)
+                // email/country/zipcode/password1
+                if(! regex.test(x.value) && id !== 'pw2'){
+                    spanBox.classList.add('show')
+                    spanBox.textContent = inputRules[id].errorMsg[0]
+                    this.classList.add('invalid')
+                } else {
+                    spanBox.classList.remove('show')
+                    this.classList.remove('invalid')
+                }
+                // confirm-password
+                if(id === 'pw1' || id === 'pw2'){
+                    let inputBox1 = document.querySelector('#pw1')
+                    let inputBox2 = document.querySelector('#pw2')
+                    spanBox = document.querySelector(`#pw2Error`)
+                    if(inputBox1.value !== inputBox2.value){
+                        spanBox.classList.add('show')
+                        inputBox1.classList.add('invalid')
+                        inputBox2.classList.add('invalid')
+                        inputBox2.setCustomValidity('invalid')
+                        spanBox.textContent = inputRules.pw2.errorMsg[0]
+                    } else{
+                        spanBox.classList.remove('show')
+                        inputBox1.classList.remove('invalid')
+                        inputBox2.classList.remove('invalid')
+                        inputBox2.setCustomValidity('')
+                    }
+                }
+
+            })
+            x.addEventListener('focusout', function(){
+                let id = x.id
+                let spanBox = document.querySelector(`#${inputRules[id].spanId}`)
+                spanBox.classList.remove('show')
+            })
+            x.addEventListener('focusin', function(){
+                let id = x.id
+                let spanBox = document.querySelector(`#${inputRules[id].spanId}`)
+                if(spanBox.textContent !== '' && ! this.checkValidity()){
+                    spanBox.classList.add('show')
+                }
+            })
+        })
+
+
+
+    </script>
+</body>
+    
+</html>
